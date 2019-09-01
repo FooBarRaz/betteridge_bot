@@ -11,7 +11,7 @@ const authEndpoint = 'https://www.reddit.com/api/v1/access_token';
 
 function getBasicAuth(user, pass) {
     const userPass = `${user}:${pass}`;
-    return `Basic ${new Buffer(userPass).toString('base64')}`;
+    return `Basic ${Buffer.from(userPass).toString('base64')}`;
 }
 
 function doWithToken(callback) {
