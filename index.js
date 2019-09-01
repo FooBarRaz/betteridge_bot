@@ -26,7 +26,6 @@ function doWithToken(callback) {
 
     const req = https.request(authEndpoint, options, res => {
         const chunks = [];
-
         res.on("data", chunk => {
             chunks.push(chunk);
         });
@@ -64,7 +63,7 @@ function getAndDo(url, options, callback) {
     req.end();
 }
 
-function readHeadline(token) {
+function readHeadline(token, callback) {
     const options = {
         "method": "GET",
         "headers": {
@@ -75,22 +74,33 @@ function readHeadline(token) {
         }
     };
     const url = 'https://oauth.reddit.com/r/all/hot';
-    getAndDo(url, options, ({data}) => writeHeadlinesToConsole(data.children.map(x => x.data)));
+    getAndDo(url, options, ({data}) => callback(extractHeadlineInfo(data.children.map(x => x.data))));
 }
 
 function writeHeadlinesToConsole(posts) {
-    posts
+    let postInfo =
+        postInfo
+            .forEach(console.log);
+    return {
+        statusCode: 200,
+        body: JSON.stringify(postInfo)
+    }
+}
+
+function extractHeadlineInfo(posts) {
+    return posts
         .map(
-        post => ({
-            title: post.title,
-            subreddit: post.subreddit_name_prefixed
-        }))
-        .forEach(console.log);
+            post => ({
+                title: post.title,
+                subreddit: post.subreddit_name_prefixed
+            }));
 }
 
 exports.handler = async (event) => {
-    doWithToken(readHeadline);
+    return new Promise((resolve, reject) => {
+        doWithToken(token => readHeadline(token, resolve))
+    });
 };
 
-exports.handler({type: 'foo'});
+exports.handler({type: 'foo'}).then(data => console.log(data)); // dummy data to invoke this from IDE
 
