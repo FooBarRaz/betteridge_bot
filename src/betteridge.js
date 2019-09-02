@@ -6,20 +6,22 @@ function isQuestion(listingItem) {
     return operations.getListingItemTitle(listingItem).includes('?');
 }
 
+function flatten(collection) {
+    return collection.reduce((acc, curr) => [...acc, ...curr], []);
+}
+
+function filterListingsWithQuestionsInThem(listings) {
+    return listings
+        .map(operations.getListingItems)
+        .reduce((acc, curr) => [...acc, ...curr], [])
+        .filter(isQuestion);
+}
+
 async function invoke() {
-    const subreddits = await fetchMultiSubreddits(path_to_multi)
-    return Promise.all(
-        subreddits
-            .map(eachSubreddit => fetchNewPosts(eachSubreddit, {limit: 75,}))
-            .map(eachPromiseForNewPosts => eachPromiseForNewPosts
-                .then(listing => {
-                        const listingsWithQuestions = operations.getListingItems(listing)
-                            .filter(isQuestion);
-                        console.log(`Found ${listingsWithQuestions.length} items`);
-                        listingsWithQuestions.forEach(saveListingItem); //instead of saving item, we will comment 'No', and upvote
-                        return listingsWithQuestions;
-                    }
-                )));
+    return fetchMultiSubreddits(path_to_multi)
+        .then(subreddits => Promise.all(subreddits.map(fetchNewPosts)))
+        .then(filterListingsWithQuestionsInThem)
+        .then(listing => Promise.all(listing.map(saveListingItem)).then(() => listing.map(operations.getListingItemTitle)))
 }
 
 module.exports = {invoke};
