@@ -1,3 +1,3 @@
 const reader = require('./readHeadlines')
 
-reader.doTheThing(console.log, ()=>{})
+reader.getHeadlines(console.log, ()=>{})

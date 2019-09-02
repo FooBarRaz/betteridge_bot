@@ -8,7 +8,7 @@ const clientSecret = process.env.client_secret;
 const authEndpoint = 'https://www.reddit.com/api/v1/access_token';
 
 module.exports = {
-    doTheThing: function(resolve, reject) {
+    getHeadlines: function(resolve, reject) {
         doWithToken(token => readHeadline(token, resolve))
     }
 }
@@ -28,19 +28,18 @@ function doWithToken(callback) {
         }
     };
 
-    let f = function(res) {
+    const req = https.request(authEndpoint, options, function (res) {
         const chunks = [];
         res.on("data", chunk => {
             chunks.push(chunk);
         });
 
-        res.on("end", function() {
+        res.on("end", function () {
             const body = Buffer.concat(chunks);
             const token = JSON.parse(body).access_token;
             callback(token);
         });
-    };
-    const req = https.request(authEndpoint, options, f);
+    });
 
     req.write(qs.stringify({
         grant_type: 'password',
