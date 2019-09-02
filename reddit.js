@@ -1,4 +1,4 @@
-const https = require('https');
+const web = require('./webutil');
 
 const username = process.env.username;
 const password = process.env.password;
@@ -12,34 +12,13 @@ async function getToken() {
         "method": "POST",
         "headers": {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": basicAuth(clientId, clientSecret),
+            "Authorization": web.basicAuth(clientId, clientSecret),
             "cache-control": "no-cache",
         }
     };
 
     const url = `${authEndpoint}?grant_type=password&username=${username}&password=${password}`
-    return new Promise((resolve, reject) => {
-        const req = https.request(url, options, function (res) {
-            const chunks = [];
-            res.on("data", chunk => {
-                chunks.push(chunk);
-            });
-
-            res.on("end", function () {
-                const body = Buffer.concat(chunks);
-                const token = JSON.parse(body).access_token;
-                resolve(token);
-            });
-
-        }).on('error', reject);
-
-        req.end();
-    });
-}
-
-function basicAuth(user, pass) {
-    const userPass = `${user}:${pass}`;
-    return `Basic ${Buffer.from(userPass).toString('base64')}`;
+    return web.promiseToFetch(url, options).then(data => data.access_token);
 }
 
 function headlines({data}) {
@@ -78,22 +57,8 @@ async function getFromApi(url, token) {
             "User-Agent": "BetteridgeBot by betteridge_bot"
         }
     };
-    return new Promise((resolve, reject) => {
-        const req = https.get(url, options, res => {
-            const chunks = [];
 
-            res.on("data", chunk => {
-                chunks.push(chunk);
-            });
-
-            res.on("end", () => {
-                const body = Buffer.concat(chunks);
-                resolve(JSON.parse(body))
-            });
-        }).on('error', reject);
-
-        req.end();
-    })
+    return web.promiseToFetch(url, options);
 }
 
-module.exports = {getToken, getPostsFrom, hotHeadlines }
+module.exports = { getToken, getPostsFrom, hotHeadlines }
