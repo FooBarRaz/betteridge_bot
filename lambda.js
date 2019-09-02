@@ -1,6 +1,5 @@
-const reddit = require('./reddit');
+const betteridge = require('./src/betteridge');
 
 exports.handler = async (event, context) => {
-    const result = reddit.hotHeadlines();
-    return context.succeed(result);
+    return context.succeed(await betteridge.invoke());
 };
