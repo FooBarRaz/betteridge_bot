@@ -65,7 +65,7 @@ async function fetchMultiSubreddits(multipath) {
 
 
 async function fetchNewPosts(subreddit, params) {
-    return getFromApi(`r/${subreddit}/new`, token, params);
+    return getFromApi(`r/${subreddit}/new`, null, params);
 }
 
 async function saveListingItem(listingItem) {
