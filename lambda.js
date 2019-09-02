@@ -1,5 +1,6 @@
 const reddit = require('./reddit');
 
-exports.handler = async (event) => {
-    return reddit.hotHeadlines().then(console.log);
+exports.handler = async (event, context) => {
+    const result = reddit.hotHeadlines();
+    return context.succeed(result);
 };
