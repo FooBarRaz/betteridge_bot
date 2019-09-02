@@ -1,3 +1,9 @@
-const reader = require('./readHeadlines')
+const reddit = require('./reddit')
 
-reader.getHeadlines(console.log, ()=>{})
+async function run() {
+    reddit.hotHeadlines()
+        .then(console.log);
+}
+
+run();
+

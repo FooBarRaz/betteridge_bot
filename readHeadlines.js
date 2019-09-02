@@ -1,11 +1,6 @@
 const qs = require("querystring");
 const https = require('https');
 
-const username = process.env.username;
-const password = process.env.password;
-const clientId = process.env.client_id;
-const clientSecret = process.env.client_secret;
-const authEndpoint = 'https://www.reddit.com/api/v1/access_token';
 
 module.exports = {
     getHeadlines: function(resolve, reject) {

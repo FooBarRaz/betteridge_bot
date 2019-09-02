@@ -1,7 +1,5 @@
-const reader = require('./readHeadlines');
+const reddit = require('./reddit');
 
 exports.handler = async (event) => {
-    return new Promise((resolve, reject) => {
-        reader.getHeadlines(resolve, reject);
-    });
+    return reddit.hotHeadlines().then(console.log);
 };
