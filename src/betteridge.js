@@ -6,10 +6,6 @@ function isQuestion(listingItem) {
     return operations.getListingItemTitle(listingItem).includes('?');
 }
 
-function flatten(collection) {
-    return collection.reduce((acc, curr) => [...acc, ...curr], []);
-}
-
 function filterListingsWithQuestionsInThem(listings) {
     return listings
         .map(operations.getListingItems)
