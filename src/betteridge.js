@@ -1,23 +1,37 @@
-const {fetchNewPosts, fetchMultiSubreddits, saveListingItem, operations} = require('./reddit');
+const {
+    fetchNewPosts,
+    fetchMultiSubreddits,
+    saveListingItem,
+    operations: {getListingItemTitle, getListingItems}
+} = require('./reddit');
 
 const path_to_multi = 'user/betteridge_bot/m/newsmulti/';
 
-function isQuestion(listingItem) {
-    return operations.getListingItemTitle(listingItem).includes('?');
+async function invoke() {
+    return fetchMultiSubreddits(path_to_multi)
+        .then(fetchPostsFromEachSubreddit)
+        .then(filterPostsWithQuestionsInTitle)
+        .then(savePosts)
 }
 
-function filterListingsWithQuestionsInThem(listings) {
+function isQuestion(listingItem) {
+    return getListingItemTitle(listingItem).includes('?');
+}
+
+function filterPostsWithQuestionsInTitle(listings) {
     return listings
-        .map(operations.getListingItems)
+        .map(getListingItems)
         .reduce((acc, curr) => [...acc, ...curr], [])
         .filter(isQuestion);
 }
 
-async function invoke() {
-    return fetchMultiSubreddits(path_to_multi)
-        .then(subreddits => Promise.all(subreddits.map(fetchNewPosts)))
-        .then(filterListingsWithQuestionsInThem)
-        .then(listing => Promise.all(listing.map(saveListingItem)).then(() => listing.map(operations.getListingItemTitle)))
+function fetchPostsFromEachSubreddit(subreddits) {
+    return Promise.all(subreddits.map(fetchNewPosts));
+}
+
+function savePosts(posts) {
+    return Promise.all(posts.map(saveListingItem))
+        .then(() => posts.map(getListingItemTitle));
 }
 
 module.exports = {invoke};
