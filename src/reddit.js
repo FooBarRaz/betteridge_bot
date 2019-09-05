@@ -8,16 +8,60 @@ const clientSecret = process.env.client_secret;
 const authEndpoint = 'https://www.reddit.com/api/v1/access_token';
 const api = 'https://oauth.reddit.com';
 
-function apiOptions(method, token) {
-    return {
-        "method": method,
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": `Bearer ${token}`,
-            "cache-control": "no-cache",
-            "User-Agent": "BetteridgeBot by betteridge_bot"
+class RedditClient {
+    constructor(token){
+        this.token = token;
+    }
+
+    apiOptions(method) {
+        return {
+            "method": method,
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Authorization": `Bearer ${this.token}`,
+                "cache-control": "no-cache",
+                "User-Agent": "BetteridgeBot by betteridge_bot"
+            }
+        };
+    }
+
+
+    async getFromApi(path, params) {
+        // token = token || await getAuthToken();
+
+        let paramString;
+        if (params) {
+            paramString = qs.stringify(params);
         }
-    };
+
+        const url = `${api}/${path}${params ? `?${paramString}` : ''}`;
+
+        return web.promiseToFetchData(url, this.apiOptions("GET"));
+    }
+
+    async postToApi(path, body, params) {
+        const options = {...this.apiOptions("POST"), body};
+        const paramString = params ? `?${qs.stringify(params)}` : '';
+        const url = `${api}/${path}${paramString}`;
+
+        return web.promiseToFetchData(url, options);
+    }
+
+    async fetchMultiSubreddits(multipath) {
+        const url = `api/multi/${multipath}`;
+        return this.getFromApi(url)
+            .then(({data}) => data.subreddits.map(sub => sub.name));
+    }
+
+
+    async fetchNewPosts(subreddit, params) {
+        return this.getFromApi(`r/${subreddit}/new`, null, params);
+    }
+
+    async saveListingItem(listingItem) {
+        return this.postToApi("api/save", null, null, {id: listingItem.data.name})
+    }
+
 }
 
 async function getAuthToken() {
@@ -31,45 +75,12 @@ async function getAuthToken() {
     };
 
     const url = `${authEndpoint}?grant_type=password&username=${username}&password=${password}`;
-    return web.promiseToFetch(url, options).then(data => data.access_token);
+    return web.promiseToFetchData(url, options).then(data => data.access_token);
 }
 
-async function getFromApi(path, token, params) {
-    token = token || await getAuthToken();
+async function getClientInstance() {
+    return getAuthToken().then(token => new RedditClient(token))
 
-    let paramString;
-    if (params) {
-        paramString = qs.stringify(params);
-    }
-
-    const url = `${api}/${path}${params ? `?${paramString}` : ''}`;
-
-    return web.promiseToFetch(url, apiOptions("GET", token));
-}
-
-async function postToApi(path, body, token, params) {
-    token = token || await getAuthToken();
-
-    const options = {...apiOptions("POST", token), body};
-    const paramString = params ? `?${qs.stringify(params)}` : '';
-    const url = `${api}/${path}${paramString}`;
-
-    return web.promiseToFetch(url, options);
-}
-
-async function fetchMultiSubreddits(multipath) {
-    const url = `api/multi/${multipath}`;
-    return getFromApi(url)
-        .then(({data}) => data.subreddits.map(sub => sub.name));
-}
-
-
-async function fetchNewPosts(subreddit, params) {
-    return getFromApi(`r/${subreddit}/new`, null, params);
-}
-
-async function saveListingItem(listingItem) {
-    return postToApi("api/save", null, null, {id: listingItem.data.name})
 }
 
 const operations = {
@@ -84,8 +95,6 @@ const operations = {
 };
 
 module.exports = {
-    fetchMultiSubreddits,
-    fetchNewPosts,
-    saveListingItem,
+    getClientInstance,
     operations
 };

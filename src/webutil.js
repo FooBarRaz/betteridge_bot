@@ -1,6 +1,6 @@
 const https = require('https');
 
-function promiseToFetch(url, options) {
+function promiseToFetchData(url, options) {
     return new Promise((resolve, reject) => {
         const req = https.request(url, options, function (res) {
             const chunks = [];
@@ -25,5 +25,5 @@ function basicAuth(user, pass) {
 }
 
 
-module.exports = { promiseToFetch, basicAuth }
+module.exports = { promiseToFetchData, basicAuth }
 
