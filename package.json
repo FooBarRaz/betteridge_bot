@@ -1,0 +1,12 @@
+{
+  "name": "betteridge-bot",
+  "version": "1.0.0",
+  "description": "a reddit bot that responds to headlines in accordance with Betteridge's Law",
+  "main": "index.js",
+  "repository": "git@github.com:fakeplasticdroid/betteridge_bot.git",
+  "author": "Raz Ali <mehraz.hakim@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.9.0"
+  }
+}
