@@ -1,3 +1,5 @@
+const { polarStarters } = require('./polarStarters');
+
 const getQuestions = (string) => {
     return string.split(/[.|:|!]/)
     //gotta do this hacky replacement to retain the delimiter on the split
@@ -11,7 +13,7 @@ const containsPolarQuestion = (string) => {
 }
 
 const isPolarQuestion = (question) => {
-    const possibleStartingWords = ['Is', 'Does', 'Did', 'Can', "Wouldn't", "Are"];
+    const possibleStartingWords = polarStarters.split(/\n/).map(s => s.trim())
     return possibleStartingWords.includes(question.split(' ')[0]);
 }
 
