@@ -66,12 +66,21 @@ class RedditClient {
     }
 
     async fetchNewPosts(subreddit, params) {
-        return this.getFromApi(`r/${subreddit}/new`, null, params);
+        return this.getFromApi(`r/${subreddit}/new`, params);
     }
 
     async saveListingItem(listingItem) {
         return this.postToApi("api/save", null, null, {id: listingItem.data.name})
     }
+
+    async fetchSavedLinks() {
+        return this.getFromApi(`user/${username}/saved`);
+    }
+
+    async hide(id) {
+        return this.postToApi("api/hide", null, {id})
+    }
+
 
 }
 

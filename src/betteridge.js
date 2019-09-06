@@ -31,20 +31,29 @@ class BetteridgeBot {
 
     commentOnPosts(posts) {
         const comment =
-            `The answer is *no*, according to [Betteridge's Law of Headlines](https://en.wikipedia.org/wiki/Betteridge's_law_of_headlines)`
+            `The answer is *no*, according to [Betteridge's Law of Headlines](https://en.wikipedia.org/wiki/Betteridge's_law_of_headlines)`;
 
-        return Promise.all(posts.map(post => this.client.postComment(fullName(post), comment)));
+        return Promise.all(
+            posts.map(post =>
+                this.client.postComment(fullName(post), comment)
+                    .then(() => post)))
+            .then(allPosts => Promise.all(
+                allPosts.map(
+                    post => this.client.hide(fullName(post))
+                        .then(() => post)
+                ))).then(() => posts.map(getListingItemTitle))
     }
 
 }
 
 module.exports = {
+    BetteridgeBot,
     invoke: async function () {
         const redditClient = await getClientInstance();
-        const bb = new BetteridgeBot(redditClient)
-            
+        const bb = new BetteridgeBot(redditClient);
+
         return redditClient.fetchMultiSubreddits(path_to_multi)
-            .then(subreddit => bb.fetchPostsFromEachSubreddit(subreddit))
+            .then(subreddits => bb.fetchPostsFromEachSubreddit(subreddits))
             .then(posts => bb.filterPostsWithPolarQuestionsInTitle(posts))
             .then(postsWithQuestions => bb.commentOnPosts(postsWithQuestions))
     }
