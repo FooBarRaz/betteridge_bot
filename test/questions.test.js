@@ -1,36 +1,43 @@
-const { isPredicateQuestion, getQuestions } = require('../src/questions');
+const {containsPolarQuestion, getQuestions} = require('../src/questions');
 
 describe('questions', function () {
     describe('getQuestions', () => {
         it('should extract all questions out of a string', () => {
-            const title = "Hello. This is a question: Is this a question?";
+            const title = "Hello. This is a question: Is this a question? Delimiter! What about this one?";
 
             let questions = getQuestions(title);
             expect(questions).toContainEqual("Is this a question?");
+            expect(questions).toContainEqual("What about this one?");
+            expect(questions).not.toContainEqual("Hello");
+            expect(questions).not.toContainEqual("This is a question");
         });
+
     });
 
-    describe('isPredicate', () => {
+    describe('containsPolarQuestion', () => {
 
-        it('should be true for the following', () => {
-           const predicateQuestions = [
-               "Did Trump draw on Dorian map to include Alabama in hurricane’s path?",
-               "Is the President Engaging In Market Manipulation?",
-               "Are African Artifacts Safer in Europe? Museum Conditions Revive Debate",
-               "Does Comey deserve an apology? Not if you read the IG's report",
-               "Fires, hurricanes, heat have Americans worrying about climate change. But will it affect the presidential race?",
-               "Wouldn’t It Be Great If People Could Vote on the Blockchain?",
-               "Can the death penalty ever be 'justified'?",
-           ];
+        describe('polar questions', function () {
+
+            const predicateQuestions = [
+                "Did Trump draw on Dorian map to include Alabama in hurricane’s path?",
+                "Is the President Engaging In Market Manipulation?",
+                "Are African Artifacts Safer in Europe? Museum Conditions Revive Debate",
+                "Does Comey deserve an apology? Not if you read the IG's report",
+                "Fires, hurricanes, heat have Americans worrying about climate change. But will it affect the presidential race?",
+                "Wouldn't It Be Great If People Could Vote on the Blockchain?",
+                "Can the death penalty ever be 'justified'?",
+            ];
 
             predicateQuestions.forEach(question => {
-                expect(isPredicateQuestion(question)).toBe(true);
+                it(`is true for "${question}"`, () => {
+                    expect(containsPolarQuestion(question)).toBe(true);
+                });
             })
-
 
         });
 
-        it('should be false for the following', () => {
+        describe('non-polar questions', function () {
+
             const nonPredicateQuestions = [
                 "Foo?",
                 "Bar",
@@ -53,11 +60,12 @@ describe('questions', function () {
                 "Why is the Russian meddling in 2016 such a big secret? I’m not allowed to say."
             ];
 
-            predicateQuestions.forEach(question => {
-                expect(isPredicateQuestion(question)).toBe(false);
+            nonPredicateQuestions.forEach(question => {
+                it(`is false for "${question}"`, function () {
+                    expect(containsPolarQuestion(question)).toBe(false);
+                });
             })
 
         });
-
     });
 });
