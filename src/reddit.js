@@ -47,12 +47,23 @@ class RedditClient {
         return web.promiseToFetchData(url, options);
     }
 
+    async postComment(parent, text) {
+        return this.postToApi(`api/comment`, null, { parent, text })
+    }
+
+    async fetchUserComments(params) {
+        return this.getFromApi(`user/${username}/comments`, params);
+    }
+
+    async deleteComment(id) {
+        return this.postToApi(`api/del`, null, { id })
+    }
+
     async fetchMultiSubreddits(multipath) {
         const url = `api/multi/${multipath}`;
         return this.getFromApi(url)
             .then(({data}) => data.subreddits.map(sub => sub.name));
     }
-
 
     async fetchNewPosts(subreddit, params) {
         return this.getFromApi(`r/${subreddit}/new`, null, params);
@@ -91,7 +102,8 @@ const operations = {
             .map(posts => posts.data)
             .map(post => post.title),
     fullName: listingItem => `${listingItem.kind}_${listingItem.data.id}`,
-    category: listingItem => listingItem.kind
+    category: listingItem => listingItem.kind,
+    itemName: listingItem => listingItem.data.name,
 };
 
 module.exports = {

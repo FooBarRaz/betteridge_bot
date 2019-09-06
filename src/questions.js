@@ -23,5 +23,5 @@ const isQuestion = (string) => {
 
 module.exports = {
     getQuestions,
-    containsPolarQuestion: containsPolarQuestion
+    containsPolarQuestion
 };
